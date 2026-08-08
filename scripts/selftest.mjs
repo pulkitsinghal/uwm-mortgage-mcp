@@ -1,0 +1,10 @@
+import { spawn } from 'node:child_process';
+import readline from 'node:readline';
+const child=spawn(process.execPath,['src/server.js'],{cwd:new URL('..',import.meta.url),env:{...process.env,UWM_MCP_MODE:'mock'},stdio:['pipe','pipe','inherit']});
+const rl=readline.createInterface({input:child.stdout});const pending=new Map();rl.on('line',(line)=>{const msg=JSON.parse(line);const resolve=pending.get(msg.id);if(resolve){pending.delete(msg.id);resolve(msg);}});let id=0;const request=(method,params={})=>new Promise((resolve)=>{const rid=++id;pending.set(rid,resolve);child.stdin.write(JSON.stringify({jsonrpc:'2.0',id:rid,method,params})+'\n');});
+const discover=await request('server/discover');if(!discover.result?.supportedVersions?.includes('2026-07-28'))throw new Error('modern discovery failed');
+const init=await request('initialize',{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'selftest',version:'1'}});if(!init.result?.serverInfo)throw new Error('initialize failed');
+const list=await request('tools/list');if((list.result?.tools?.length??0)<6)throw new Error('tools/list incomplete');
+const summary=await request('tools/call',{name:'mortgage_get_summary',arguments:{}});if(summary.result?.isError)throw new Error('summary tool failed');
+const projection=await request('tools/call',{name:'mortgage_calculate_extra_payment',arguments:{extraMonthly:1000}});if(projection.result?.isError)throw new Error('projection tool failed');
+console.log(JSON.stringify({ok:true,tools:list.result.tools.map(x=>x.name),summary:summary.result.structuredContent,projection:projection.result.structuredContent},null,2));child.kill();
