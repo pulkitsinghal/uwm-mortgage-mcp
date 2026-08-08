@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-08T12:00:00Z",
+  "summary": {
+    "servicer": "UWM", "principalBalance": 500000, "interestRate": 6.25, "rateType": "fixed", "monthlyPayment": 4050,
+    "principalAndInterest": 3386.18, "escrowPayment": 663.82, "escrowBalance": 8125.41, "nextDueDate": "2026-09-01",
+    "maturityDate": "2054-07-01", "updatedAt": "2026-08-08T12:00:00Z"
+  },
+  "payments": [], "escrow": { "balance": 8125.41, "monthlyDeposit": 663.82 }, "statements": []
+}
