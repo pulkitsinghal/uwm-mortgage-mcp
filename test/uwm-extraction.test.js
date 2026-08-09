@@ -76,3 +76,44 @@ test('returns statement metadata without portal filenames, identifiers, or downl
     await browser.close();
   }
 });
+
+test('selects Billing from a custom document category control', async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.setContent(`
+      <div
+        aria-controls="document-options"
+        aria-expanded="false"
+        aria-label="Documents"
+        role="combobox"
+        tabindex="0"
+      >Choose category</div>
+      <div id="document-options" role="listbox" hidden>
+        <div role="option">Billing</div>
+      </div>
+      <table hidden>
+        <tr><th>Type</th><th>Date</th></tr>
+        <tr><td>MORTGAGE STATEMENT</td><td>11/02/2030</td></tr>
+      </table>
+      <script>
+        const selector = document.querySelector('[role="combobox"]');
+        const options = document.querySelector('[role="listbox"]');
+        const table = document.querySelector('table');
+        selector.addEventListener('click', () => {
+          selector.setAttribute('aria-expanded', 'true');
+          options.hidden = false;
+        });
+        options.addEventListener('click', () => {
+          options.hidden = true;
+          table.hidden = false;
+        });
+      </script>
+    `);
+
+    await selectBillingDocuments(page);
+    assert.equal(await page.getByRole('row').filter({ hasText: /MORTGAGE STATEMENT/i }).count(), 1);
+  } finally {
+    await browser.close();
+  }
+});

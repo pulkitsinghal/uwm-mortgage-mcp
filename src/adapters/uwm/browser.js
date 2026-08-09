@@ -20,12 +20,19 @@ function round2(value) {
 }
 
 export class UwmBrowserTransport {
-  constructor({ loginRoute = 'manual', acceptTerms = false, onePasswordItem, onePasswordAccount } = {}) {
+  constructor({
+    loginRoute = 'manual',
+    acceptTerms = false,
+    rememberOnThisMac = false,
+    onePasswordItem,
+    onePasswordAccount,
+  } = {}) {
     if (!['manual', 'onepassword'].includes(loginRoute)) {
       throw new Error('UWM live login route must be manual or onepassword.');
     }
     this.loginRoute = loginRoute;
     this.acceptTerms = acceptTerms;
+    this.rememberOnThisMac = rememberOnThisMac;
     this.onePasswordItem = onePasswordItem;
     this.onePasswordAccount = onePasswordAccount;
     this.browser = null;
@@ -60,8 +67,8 @@ export class UwmBrowserTransport {
       hostname: HOSTNAME,
       itemId: this.onePasswordItem,
       account: this.onePasswordAccount,
-      keychainService: KEYCHAIN_SERVICE,
-      cacheInKeychain: true,
+      keychainService: this.rememberOnThisMac ? KEYCHAIN_SERVICE : undefined,
+      cacheInKeychain: this.rememberOnThisMac,
     });
     const username = this.page.getByPlaceholder('Username', { exact: true });
     const password = this.page.locator('input[type="password"]:visible');
