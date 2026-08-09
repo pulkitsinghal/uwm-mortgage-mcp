@@ -1,0 +1,24 @@
+{
+  "fixtureNotice": "Synthetic fixture derived from observed labels only. Every value is fake.",
+  "schemaVersion": 3,
+  "capturedAt": "2030-11-15T12:00:00.000Z",
+  "origin": "https://uwm.loanadministration.com",
+  "strategy": "browser-extraction",
+  "responses": [],
+  "browserExtraction": {
+    "summary": {
+      "servicer": "UWM",
+      "principalBalance": 424242.42,
+      "interestRate": 5.125,
+      "monthlyPayment": 3333.33,
+      "escrowBalance": 7654.32,
+      "nextDueDate": "2030-12-01",
+      "maturityDate": "2054-06-01"
+    },
+    "payments": [{ "date": "2030-11-01", "total": 3333.33 }],
+    "escrow": { "balance": 7654.32, "monthlyDeposit": 654.32 },
+    "statements": [
+      { "date": "2030-11-02", "title": "Mortgage Statement", "downloadUrl": null }
+    ]
+  }
+}

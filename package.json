@@ -8,11 +8,15 @@
   "bin": { "uwm-mortgage-mcp": "src/server.js" },
   "scripts": {
     "start": "node src/server.js",
+    "start:live:manual": "UWM_MCP_MODE=live UWM_MCP_LOGIN_ROUTE=manual node src/server.js",
+    "start:live:1password": "UWM_MCP_MODE=live UWM_MCP_LOGIN_ROUTE=onepassword node src/server.js",
     "test": "node --test",
     "selftest": "node scripts/selftest.mjs",
-    "check": "node --check src/server.js && node --check src/adapters/mock.js && node --check src/adapters/snapshot.js && node --check src/calculations.js",
+    "check": "node --check src/server.js && node --check src/adapters/mock.js && node --check src/adapters/snapshot.js && node --check src/adapters/uwm/live.js && node --check src/adapters/uwm/browser.js && node --check src/adapters/uwm/extract.js && node --check src/calculations.js && node --check src/login-options.js && node --check scripts/credential-bridge.mjs && node --check scripts/capture-uwm.mjs && node --check scripts/inspect-capture.mjs",
     "capture:uwm": "node scripts/capture-uwm.mjs",
-    "inspect:capture": "node scripts/inspect-capture.mjs"
+    "capture:uwm:1password": "node scripts/capture-uwm.mjs --onepassword",
+    "inspect:capture": "node scripts/inspect-capture.mjs",
+    "privacy:scan": "node scripts/privacy-scan.mjs"
   },
   "engines": { "node": ">=20" },
   "license": "MIT",
