@@ -3,6 +3,84 @@ import assert from 'node:assert/strict';
 
 import { UwmLiveAdapter } from '../src/adapters/uwm/live.js';
 
+test('live adapter stays neutral until a login route is selected', async () => {
+  let transportCreations = 0;
+  const adapter = new UwmLiveAdapter({
+    transportFactory: () => {
+      transportCreations += 1;
+      throw new Error('transport must not start during neutral status');
+    },
+  });
+  const status = await adapter.connectionStatus();
+  assert.equal(status.setupRequired, true);
+  assert.equal(status.authenticated, false);
+  assert.equal(status.loginRoute, null);
+  assert.equal(transportCreations, 0);
+  await assert.rejects(() => adapter.getSummary(), /setup is required/i);
+});
+
+test('guided login requires terms for 1Password and keeps Keychain opt-in separate', async () => {
+  const createdOptions = [];
+  let closeCalls = 0;
+  const adapter = new UwmLiveAdapter({
+    transport: {
+      isAuthenticated: async () => true,
+      close: async () => {
+        closeCalls += 1;
+      },
+    },
+    transportFactory: (options) => {
+      createdOptions.push(options);
+      return {
+        isAuthenticated: async () => false,
+        close: async () => {},
+      };
+    },
+  });
+
+  await assert.rejects(
+    () => adapter.startLogin({ route: 'onepassword', acceptUwmTerms: false }),
+    /terms acceptance/i,
+  );
+  assert.equal(createdOptions.length, 0);
+  assert.equal(closeCalls, 0);
+
+  const status = await adapter.startLogin({
+    route: 'onepassword',
+    acceptUwmTerms: true,
+    rememberOnThisMac: false,
+  });
+  assert.equal(status.setupRequired, false);
+  assert.equal(status.loginRoute, 'onepassword');
+  assert.equal(status.rememberOnThisMac, false);
+  assert.equal(createdOptions.length, 1);
+  assert.equal(closeCalls, 1);
+  assert.equal(createdOptions[0].acceptTerms, true);
+  assert.equal(createdOptions[0].rememberOnThisMac, false);
+});
+
+test('manual login never requires terms or Keychain persistence', async () => {
+  let createdOptions;
+  const adapter = new UwmLiveAdapter({
+    transportFactory: (options) => {
+      createdOptions = options;
+      return {
+        isAuthenticated: async () => false,
+        close: async () => {},
+      };
+    },
+  });
+  const status = await adapter.startLogin({ route: 'manual' });
+  assert.equal(status.loginRoute, 'manual');
+  assert.equal(status.rememberOnThisMac, false);
+  assert.equal(createdOptions.acceptTerms, false);
+  assert.equal(createdOptions.rememberOnThisMac, false);
+  await assert.rejects(
+    () => adapter.startLogin({ route: 'manual', rememberOnThisMac: true }),
+    /never reads or writes/i,
+  );
+});
+
 test('live adapter fails closed when its browser session is not authenticated', async () => {
   const adapter = new UwmLiveAdapter({
     transport: {

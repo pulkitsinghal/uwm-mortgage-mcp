@@ -14,7 +14,13 @@ export function loginOptions() {
     setupGuide: [
       {
         step: 'choose-login-route',
-        userAction: 'Choose 1Password biometric approval or manual login.',
+        userAction:
+          'Present both choices, then call mortgage_start_login only after the user selects one.',
+      },
+      {
+        step: 'confirm-login-consent',
+        userAction:
+          'For 1Password, obtain explicit UWM terms consent and separate Remember on this Mac consent.',
       },
       {
         step: 'submit-primary-login',
@@ -38,8 +44,7 @@ export function loginOptions() {
       {
         id: 'onepassword',
         label: '1Password with biometric approval',
-        command: 'UWM_MCP_ACCEPT_TERMS=1 npm run start:live:1password',
-        validationCommand: 'npm run capture:uwm:1password -- --accept-terms',
+        recommendedWhenAvailable: true,
         requires: [
           'macOS',
           '1Password CLI',
@@ -48,14 +53,13 @@ export function loginOptions() {
         ],
         requiresExplicitTermsConsent: true,
         completesMfa: 'user',
-        cachesCredentialIn: 'macOS Keychain',
+        cachesCredentialIn: 'macOS Keychain only with separate opt-in',
         ...sharedLimits,
       },
       {
         id: 'manual',
         label: 'Log in yourself',
-        command: 'npm run start:live:manual',
-        validationCommand: 'npm run capture:uwm',
+        recommendedWhenAvailable: false,
         requires: ['headed browser'],
         requiresExplicitTermsConsent: false,
         completesMfa: 'user',

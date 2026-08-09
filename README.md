@@ -14,6 +14,7 @@ A read-only Model Context Protocol (MCP) server for mortgage tracking with an au
 ## Tools
 
 - `mortgage_connection_status`
+- `mortgage_start_login`
 - `mortgage_get_summary`
 - `mortgage_get_payment_history`
 - `mortgage_get_escrow`
@@ -42,6 +43,23 @@ node src/server.js
 
 The live adapter keeps one ephemeral headed browser open for the MCP process lifetime. It does not save a browser profile, cookies, or storage state.
 
+For the guided MCP/plugin flow, start live mode without preselecting a route:
+
+```bash
+UWM_MCP_MODE=live npm start
+```
+
+Call `mortgage_connection_status`. While setup is incomplete it is side-effect-free: it returns the
+1Password and manual choices without opening a browser, querying 1Password, or reading/writing
+Keychain. Present both choices to the user, then call `mortgage_start_login` with the selected route.
+
+For `onepassword`, `acceptUwmTerms: true` is required immediately before login. Keychain persistence
+requires a separate `rememberOnThisMac: true` opt-in and defaults to false. The login action never
+accepts a username, password, or MFA value.
+
+The commands below are advanced direct-start fallbacks for local testing. Running one explicitly
+preselects that route.
+
 1Password-assisted route on macOS, after the user explicitly agrees to UWM's terms for that login:
 
 ```bash
@@ -56,7 +74,7 @@ Manual route:
 npm run start:live:manual
 ```
 
-Call `mortgage_connection_status` to open the login browser and receive guided setup steps. The 1Password route requests desktop biometric approval, fills only the primary login form, and caches the login in macOS Keychain. The manual route leaves that form to the user. Both routes leave UWM email OTP/MFA entirely to the user; enter one-time codes only in the UWM browser and never in MCP or chat. Call connection status again after the dashboard appears.
+The 1Password route requests desktop biometric approval and fills only the primary login form. The guided route uses macOS Keychain only after the separate remember-on-this-Mac opt-in. The manual route leaves the form to the user. Both routes leave UWM email OTP/MFA entirely to the user; enter one-time codes only in the UWM browser and never in MCP or chat. Call connection status again after the dashboard appears.
 
 The observed browser adapter supports:
 
