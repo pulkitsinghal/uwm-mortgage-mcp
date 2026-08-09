@@ -157,7 +157,33 @@ export async function selectBillingDocuments(page) {
   if (!documents) {
     throw new Error('UWM browser extraction could not find the document category selector.');
   }
-  await documents.selectOption({ label: 'Billing' });
+
+  const tagName = await documents.evaluate((element) => element.tagName.toLowerCase());
+  if (tagName === 'select') {
+    await documents.selectOption({ label: 'Billing' });
+  } else {
+    const billingChoices = () => [
+      page.getByRole('option', { name: /^Billing$/i }),
+      page.getByRole('menuitem', { name: /^Billing$/i }),
+      page.getByText(/^Billing$/i),
+    ];
+    const clickVisibleBillingChoice = async () => {
+      for (const candidate of billingChoices()) {
+        if ((await candidate.count()) > 0 && (await candidate.first().isVisible())) {
+          await candidate.first().click();
+          return true;
+        }
+      }
+      return false;
+    };
+
+    if (!(await clickVisibleBillingChoice())) {
+      await documents.click();
+      if (!(await clickVisibleBillingChoice())) {
+        throw new Error('UWM browser extraction could not select the Billing document category.');
+      }
+    }
+  }
   await page.getByRole('row').filter({ hasText: /MORTGAGE STATEMENT/i }).first().waitFor({
     state: 'visible',
     timeout: 30_000,
