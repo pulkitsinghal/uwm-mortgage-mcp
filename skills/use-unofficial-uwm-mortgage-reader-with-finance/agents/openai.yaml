@@ -1,0 +1,9 @@
+interface:
+  display_name: "Use the Unofficial UWM Reader with Finance"
+  short_description: "Combine community mortgage data with Finance"
+  default_prompt: "Use $use-unofficial-uwm-mortgage-reader-with-finance to review my complete mortgage picture."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "unofficial-uwm-mortgage-reader"
+      description: "Community-contributed, unofficial, read-only UWM mortgage reader"

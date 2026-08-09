@@ -47,6 +47,11 @@ test('tool safety annotations distinguish local login setup from mortgage reads'
 test('connection status presents 1Password, manual login, and private MFA guidance', async () => {
   const adapter = new MockMortgageAdapter();
   const status = await callTool(adapter, 'mortgage_connection_status', {});
+  assert.equal(status.login.publisherDisclosure.communityContributed, true);
+  assert.equal(status.login.publisherDisclosure.officialUwmProduct, false);
+  assert.equal(status.login.publisherDisclosure.affiliatedWithUwm, false);
+  assert.equal(status.login.publisherDisclosure.speaksForUwm, false);
+  assert.match(status.login.publisherDisclosure.text, /Unofficial community software/);
   assert.equal(status.login.portalUrl, 'https://uwm.loanadministration.com/uwm/#/login');
   assert.deepEqual(status.login.routes.map((route) => route.id), ['onepassword', 'manual']);
   assert.equal(status.login.routes[0].recommendedWhenAvailable, true);
