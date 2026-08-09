@@ -1,0 +1,20 @@
+{
+  "name": "community-uwm-mortgage-reader",
+  "interface": {
+    "displayName": "Community Mortgage Reader"
+  },
+  "plugins": [
+    {
+      "name": "unofficial-uwm-mortgage-reader",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Finance"
+    }
+  ]
+}

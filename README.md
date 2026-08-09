@@ -1,6 +1,8 @@
-# UWM Mortgage MCP
+# Unofficial UWM Mortgage Reader
 
-A read-only Model Context Protocol (MCP) server for mortgage tracking with an authenticated UWM browser adapter.
+A community-contributed, read-only Model Context Protocol (MCP) server for mortgage tracking with an authenticated UWM browser adapter.
+
+> **Independent community project:** This software is not made, sponsored, supported, endorsed, or operated by UWM. It does not speak for UWM. “UWM” identifies the mortgage portal the adapter can read; it is not the publisher of this software.
 
 > **Private alpha:** live validation found no stable same-origin JSON response for the required views. The adapter therefore uses narrowly scoped browser extraction on only the authenticated views observed during owner validation. It does not invent or call undocumented borrower endpoints.
 
@@ -93,7 +95,25 @@ npm test
 npm run selftest
 npm run check
 npm run privacy:scan
+npm run privacy:scan:history
 ```
+
+## Install as a community connector
+
+This repository includes a local Codex/ChatGPT desktop plugin named **Unofficial UWM Mortgage Reader**. It runs on each user's own Mac, opens that user's own headed browser, and does not reference another user's tunnel, ChatGPT app ID, credentials, or session.
+
+After cloning the repository locally:
+
+```bash
+npm ci
+npx playwright install chromium
+codex plugin marketplace add .
+codex plugin add unofficial-uwm-mortgage-reader@community-uwm-mortgage-reader
+```
+
+Restart the desktop app, enable the plugin, and begin with `mortgage_connection_status`. A repository owner can also share the installed local plugin with members of the same ChatGPT workspace. This community distribution is separate from OpenAI's universal public directory.
+
+The package remains intentionally private from npm publishing. Do not remove `"private": true` merely to use the repository marketplace.
 
 ## Live UWM validation
 
@@ -113,7 +133,7 @@ The live test acceptance criteria are:
 
 `package.json` intentionally contains `"private": true`. Remove that only after live verification, privacy review, trademark wording review, and any marketplace signing requirements are independently validated.
 
-This project is not affiliated with or endorsed by UWM.
+This community project is not made, sponsored, supported, endorsed, or operated by UWM and does not speak for UWM.
 
 ## Private live-discovery helper
 

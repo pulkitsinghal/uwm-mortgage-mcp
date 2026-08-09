@@ -1,7 +1,7 @@
 {
   "name": "uwm-mortgage-mcp",
   "version": "0.1.0-private.0",
-  "description": "Read-only MCP server for mortgage servicing data, with a UWM portal adapter.",
+  "description": "Community-built, unofficial, read-only MCP server for mortgage servicing data with a UWM portal adapter.",
   "type": "module",
   "private": true,
   "publishConfig": { "access": "public" },
@@ -16,7 +16,8 @@
     "capture:uwm": "node scripts/capture-uwm.mjs",
     "capture:uwm:1password": "node scripts/capture-uwm.mjs --onepassword",
     "inspect:capture": "node scripts/inspect-capture.mjs",
-    "privacy:scan": "node scripts/privacy-scan.mjs"
+    "privacy:scan": "node scripts/privacy-scan.mjs",
+    "privacy:scan:history": "node scripts/privacy-scan.mjs --history"
   },
   "engines": { "node": ">=20" },
   "license": "MIT",

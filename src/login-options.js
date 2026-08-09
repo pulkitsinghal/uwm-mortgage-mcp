@@ -10,6 +10,14 @@ const sharedLimits = Object.freeze({
 
 export function loginOptions() {
   return {
+    publisherDisclosure: {
+      communityContributed: true,
+      officialUwmProduct: false,
+      affiliatedWithUwm: false,
+      speaksForUwm: false,
+      text:
+        'Unofficial community software. Not made, sponsored, supported, endorsed, or operated by UWM, and does not speak for UWM.',
+    },
     portalUrl: UWM_PORTAL_URL,
     setupGuide: [
       {

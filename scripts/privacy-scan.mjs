@@ -5,22 +5,64 @@ import { promisify } from 'node:util';
 
 const run = promisify(execFile);
 const stagedOnly = process.argv.includes('--staged');
+const historyOnly = process.argv.includes('--history');
+if (stagedOnly && historyOnly) {
+  throw new Error('Choose either --staged or --history.');
+}
+
+async function historyFiles() {
+  const { stdout } = await run('git', ['rev-list', '--objects', '--all'], {
+    maxBuffer: 16 * 1024 * 1024,
+  });
+  const objects = new Map();
+  for (const line of stdout.split('\n').filter(Boolean)) {
+    const separator = line.indexOf(' ');
+    if (separator === -1) continue;
+    const object = line.slice(0, separator);
+    const path = line.slice(separator + 1);
+    const paths = objects.get(object) || [];
+    paths.push(path);
+    objects.set(object, paths);
+  }
+
+  const files = [];
+  for (const [object, paths] of objects) {
+    const type = await run('git', ['cat-file', '-t', object]);
+    if (type.stdout.trim() !== 'blob') continue;
+    const content = await run('git', ['cat-file', '-p', object], {
+      encoding: 'buffer',
+      maxBuffer: 16 * 1024 * 1024,
+    });
+    files.push({ object, paths, content: content.stdout });
+  }
+  return files;
+}
+
 const gitArgs = stagedOnly
   ? ['diff', '--cached', '--name-only', '--diff-filter=ACMR', '-z']
   : ['ls-files', '--cached', '--others', '--exclude-standard', '-z'];
-const { stdout } = await run('git', gitArgs, { encoding: 'buffer' });
-const files = stdout
-  .toString('utf8')
-  .split('\0')
-  .filter(Boolean);
+const files = historyOnly
+  ? await historyFiles()
+  : (
+      await run('git', gitArgs, {
+        encoding: 'buffer',
+      })
+    ).stdout
+      .toString('utf8')
+      .split('\0')
+      .filter(Boolean)
+      .map((path) => ({ path }));
 
-const forbiddenPaths = files.filter(
-  (file) =>
-    /^private\//i.test(file) ||
-    /(?:browser|chrome)[-_ ]?profile/i.test(file) ||
-    /storage[-_ ]?state/i.test(file) ||
-    /\.(?:har|pdf|png|jpe?g)$/i.test(file),
-);
+const forbiddenPaths = files.flatMap((file) => {
+  const paths = file.paths || [file.path];
+  return paths.filter(
+    (path) =>
+      /^private\//i.test(path) ||
+      /(?:browser|chrome)[-_ ]?profile/i.test(path) ||
+      /storage[-_ ]?state/i.test(path) ||
+      /\.(?:har|pdf|png|jpe?g)$/i.test(path),
+  );
+});
 
 const rules = [
   ['private key', /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/],
@@ -42,25 +84,47 @@ const findings = [];
 for (const file of files) {
   let content;
   try {
-    content = await fs.readFile(file, 'utf8');
+    content = historyOnly ? file.content.toString('utf8') : await fs.readFile(file.path, 'utf8');
   } catch {
     continue;
   }
   if (content.includes('\0')) continue;
   for (const [name, pattern] of rules) {
-    if (pattern.test(content)) findings.push({ file, rule: name });
+    if (pattern.test(content)) findings.push({ path: file.path, rule: name });
   }
   const emails = content.match(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi) || [];
   if (emails.some((email) => !/\.(?:test|example|invalid)$/i.test(email))) {
-    findings.push({ file, rule: 'non-synthetic email address' });
+    findings.push({ path: file.path, rule: 'non-synthetic email address' });
   }
   const statementNames = content.match(/MORTGAGE STATEMENT_[^\s<"]+\.pdf/gi) || [];
   if (statementNames.some((name) => !/FAKE[-_]LOAN/i.test(name))) {
-    findings.push({ file, rule: 'non-synthetic statement filename' });
+    findings.push({ path: file.path, rule: 'non-synthetic statement filename' });
   }
 }
 
 if (forbiddenPaths.length || findings.length) {
+  if (historyOnly) {
+    const ruleCounts = new Map();
+    for (const rule of [
+      ...forbiddenPaths.map(() => 'forbidden private-data path'),
+      ...findings.map((finding) => finding.rule),
+    ]) {
+      ruleCounts.set(rule, (ruleCounts.get(rule) || 0) + 1);
+    }
+    console.error(
+      JSON.stringify(
+        {
+          ok: false,
+          scope: 'all-git-history',
+          findings: [...ruleCounts].map(([rule, occurrences]) => ({ rule, occurrences })),
+          note: 'Historical paths and matching content are intentionally suppressed.',
+        },
+        null,
+        2,
+      ),
+    );
+    process.exit(1);
+  }
   console.error(
     JSON.stringify(
       {
@@ -76,5 +140,9 @@ if (forbiddenPaths.length || findings.length) {
 }
 
 console.log(
-  JSON.stringify({ ok: true, scope: stagedOnly ? 'staged' : 'tracked-and-untracked', files: files.length }),
+  JSON.stringify({
+    ok: true,
+    scope: historyOnly ? 'all-git-history' : stagedOnly ? 'staged' : 'tracked-and-untracked',
+    files: files.length,
+  }),
 );

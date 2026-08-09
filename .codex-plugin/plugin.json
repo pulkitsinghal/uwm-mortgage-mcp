@@ -1,0 +1,36 @@
+{
+  "name": "unofficial-uwm-mortgage-reader",
+  "version": "0.1.0",
+  "description": "Community-contributed, unofficial, read-only mortgage reader for the UWM servicing portal.",
+  "author": {
+    "name": "Pulkit Singhal (community contributor)",
+    "url": "https://github.com/pulkitsinghal"
+  },
+  "repository": "https://github.com/pulkitsinghal/uwm-mortgage-mcp",
+  "license": "MIT",
+  "keywords": [
+    "community",
+    "finance",
+    "mortgage",
+    "read-only",
+    "unofficial",
+    "uwm"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Unofficial UWM Mortgage Reader",
+    "shortDescription": "Community-built, read-only mortgage reader.",
+    "longDescription": "An independent, community-contributed mortgage reader for a user's own UWM servicing portal. Not made, sponsored, supported, endorsed, or operated by UWM, and does not speak for UWM. Credentials and MFA stay in 1Password or the user's headed browser; no payment or account-mutation tools are included.",
+    "developerName": "Pulkit Singhal (community contributor)",
+    "category": "Finance",
+    "capabilities": [
+      "Read"
+    ],
+    "defaultPrompt": [
+      "Connect my mortgage with the unofficial community reader.",
+      "Review my mortgage using read-only data.",
+      "Compare extra principal with keeping cash."
+    ]
+  }
+}
