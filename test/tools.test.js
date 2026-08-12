@@ -32,14 +32,12 @@ test('summary validates', async () => {
   assert.equal(typeof summary.principalBalance, 'number');
 });
 
-test('tool safety annotations distinguish local login setup from mortgage reads', () => {
+test('all tools are non-destructive mortgage reads while login setup remains locally non-idempotent', () => {
   for (const tool of toolDefinitions()) {
     assert.equal(tool.annotations?.destructiveHint, false, tool.name);
+    assert.equal(tool.annotations?.readOnlyHint, true, tool.name);
     if (tool.name === 'mortgage_start_login') {
-      assert.equal(tool.annotations?.readOnlyHint, false, tool.name);
       assert.equal(tool.annotations?.idempotentHint, false, tool.name);
-    } else {
-      assert.equal(tool.annotations?.readOnlyHint, true, tool.name);
     }
   }
 });
