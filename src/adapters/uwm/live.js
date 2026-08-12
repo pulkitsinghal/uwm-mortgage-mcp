@@ -32,6 +32,7 @@ export class UwmLiveAdapter {
       };
     }
     const authenticated = await this.transport.isAuthenticated();
+    const connectionDetails = this.transport.connectionDetails?.() || {};
     return {
       adapter: 'uwm-live-browser',
       authenticated,
@@ -41,6 +42,7 @@ export class UwmLiveAdapter {
       setupRequired: false,
       loginRoute: this.loginRoute,
       rememberOnThisMac: this.rememberOnThisMac,
+      ...connectionDetails,
       ...(authenticated ? {} : { error: 'UWM authentication is missing or expired.' }),
     };
   }

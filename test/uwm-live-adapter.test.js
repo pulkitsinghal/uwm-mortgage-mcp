@@ -85,6 +85,10 @@ test('live adapter fails closed when its browser session is not authenticated', 
   const adapter = new UwmLiveAdapter({
     transport: {
       isAuthenticated: async () => false,
+      connectionDetails: () => ({
+        loginStage: 'manual-fallback',
+        loginAction: 'UWM automatic login stopped safely at resolving-secure-login. Continue in the open UWM browser.',
+      }),
       getSummary: async () => {
         throw new Error('UWM authentication is missing or expired.');
       },
@@ -92,6 +96,8 @@ test('live adapter fails closed when its browser session is not authenticated', 
   });
   const status = await adapter.connectionStatus();
   assert.equal(status.authenticated, false);
+  assert.equal(status.loginStage, 'manual-fallback');
+  assert.match(status.loginAction, /continue in the open UWM browser/i);
   assert.match(status.error, /missing or expired/i);
   await assert.rejects(() => adapter.getSummary(), /missing or expired/i);
 });
