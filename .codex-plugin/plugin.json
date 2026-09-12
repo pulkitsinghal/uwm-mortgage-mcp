@@ -1,6 +1,6 @@
 {
   "name": "unofficial-uwm-mortgage-reader",
-  "version": "0.1.0",
+  "version": "0.1.0+codex.local-2026-09-12-221331",
   "description": "Community-contributed, unofficial, read-only mortgage reader for the UWM servicing portal.",
   "author": {
     "name": "Pulkit Singhal (community contributor)",
